@@ -120,7 +120,7 @@ contract Cargo {
       return requestList;
   }
 
-  function bookCargo(uint _weight,uint _volume,string _category,string _name,uint _phno,string _custname) public payable {
+  function bookCargo(uint _weight,uint _volume,string _category,string _name,uint _phno,string _custname,address _caddr) public payable {
       require (!carrierList[mapCarrier[msg.sender]].valid,"Not a valid address");
       
       Cargos memory currentcargo;
@@ -131,7 +131,7 @@ contract Cargo {
       currentcargo.custname = _custname;
       currentcargo.phno = _phno;
       currentcargo.cargoname = _name;
-      currentcargo.companyAddr = address(0);
+      currentcargo.companyAddr = _caddr;
       currentcargo.amountToPay = 0;
       cargoList[msg.sender].push(currentcargo);
    }
@@ -141,6 +141,25 @@ contract Cargo {
       return true;
     else
       return false;  
+  }
+   function getDriverDetails (uint id) public view returns(string,address)  {
+    require (id >0 && id <=numCarriers,"Invalid id of driver");
+
+    return (carrierList[id].company,carrierList[id].companyAddr);
+  }
+  function getFare (uint id,string _path) public view returns(uint)  {
+    require (id >0 && id <=numCarriers,"Invalid id of driver");
+    uint fare;
+    uint numser = carrierList[id].numservice;
+    address compaddr = carrierList[id].companyAddr;
+    string memory b = serviceList[compaddr][j].path;
+    
+    for(uint j=0;j<numser;j++){
+      if(keccak256(abi.encodePacked(_path)) == keccak256(abi.encodePacked(b)))
+        fare = serviceList[compaddr][j].fareperkm;
+    }
+
+    return fare;
   }
 
   
