@@ -32,6 +32,7 @@ contract Cargo {
     uint volume;
     address companyAddr;
     uint amountToPay;
+    uint status;
   }
   
   mapping(uint => Carrier)  carrierList;
@@ -39,6 +40,8 @@ contract Cargo {
   mapping (address => carrierInfo[]) serviceList;
   mapping (address => Cargos[]) cargoList;
   mapping (address => uint) numCargo;
+  mapping (address => Cargos[]) serviceCargo;
+  
   
   
 
@@ -120,7 +123,7 @@ contract Cargo {
       return requestList;
   }
 
-  function bookCargo(uint _weight,uint _volume,string _category,string _name,uint _phno,string _custname,address _caddr) public payable {
+  function bookCargo(uint _weight,uint _volume,string _category,string _name,uint _phno,string _custname,address _caddr,uint _pay) public payable {
       require (!carrierList[mapCarrier[msg.sender]].valid,"Not a valid address");
       
       Cargos memory currentcargo;
@@ -132,8 +135,10 @@ contract Cargo {
       currentcargo.phno = _phno;
       currentcargo.cargoname = _name;
       currentcargo.companyAddr = _caddr;
-      currentcargo.amountToPay = 0;
+      currentcargo.amountToPay = _pay;
+      currentcargo.status = 1;
       cargoList[msg.sender].push(currentcargo);
+      serviceCargo[_caddr].push(currentcargo);
    }
 
    function isDriverValid() public view returns(bool res) {
@@ -162,7 +167,34 @@ contract Cargo {
     return fare;
   }
 
-  
+  function getCargoList () public view returns(uint[])  {
+      require (!carrierList[mapCarrier[msg.sender]].valid,"Not a valid address");
 
+     uint[] memory requestList = new uint[](5);
+     uint size = numCargo[msg.sender];
+     uint count=0;
+     for(uint i=0;i<size;i++){
+      uint v = cargoList[msg.sender][i].status;
+      if(v==1){
+        if(count==5)
+                break;
+        requestList[count] = i+1;
+      }
+     }
+     return requestList;
+  }
+  function getCargoDetails (uint _id) public view returns(string,string,uint) {
+      require (!carrierList[mapCarrier[msg.sender]].valid,"Not a valid address");
+
+      return (cargoList[msg.sender][_id].category,cargoList[msg.sender][_id].cargoname,cargoList[msg.sender][_id].amountToPay);
+  }
+
+  function delivered(uint _id) public  {
+      require (!carrierList[mapCarrier[msg.sender]].valid,"Not a valid address");
+      cargoList[msg.sender][_id].status=2;
+    
+  }
+  
+  
 
 }

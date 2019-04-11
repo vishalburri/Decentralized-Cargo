@@ -153,7 +153,7 @@ App = {
     ridedetails.hide();
     try{
       console.log(App.fcost);
-      await cargoInstance.bookCargo(cweight,cvolume,category,cargoname,cphno,cname,App.caddr,{from:App.account,value:App.fcost});
+      await cargoInstance.bookCargo(cweight,cvolume,category,cargoname,cphno,cname,App.caddr,App.fcost,{from:App.account,value:App.fcost});
     }
     catch(err){
       alert("Cannot Book Request");
